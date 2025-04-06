@@ -1,0 +1,20 @@
+[package]
+name = "pandacare-auth"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+argon2 = "0.5.3"
+bigdecimal = { version = "0.4.8", features = ["serde"] }
+diesel = { version = "2.2.9", features = ["numeric", "postgres", "r2d2", "uuid"] }
+dotenvy = "0.15.7"
+env_logger = "0.11.8"
+jsonwebtoken = "9.3.1"
+log = "0.4.27"
+password-hash = { version = "0.5.0", features = ["getrandom"] }
+postgres = "0.19.10"
+r2d2 = "0.8.10"
+serde = { version = "1.0.219", features = ["derive"] }
+thiserror = "2.0.12"
+uuid = { version = "1.16.0", features = ["serde", "v4"] }
