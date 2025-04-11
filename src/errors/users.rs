@@ -14,4 +14,8 @@ pub enum UserValidationError {
     IncorrectPassword,
     #[error("Email doesn't exist")]
     InvalidEmail,
+    #[error("A database integrity error has occurred. Please contact site administrator")]
+    InvalidPasswordFormat,
+    #[error("User not found")]
+    UserNotFound,
 }

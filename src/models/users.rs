@@ -42,8 +42,3 @@ pub struct LoginFields {
     pub email: String,
     pub password: String,
 }
-
-pub struct AdditionalClaims {
-    pub id: String,
-    pub role: String,
-}

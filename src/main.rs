@@ -5,7 +5,7 @@ use actix_web::{web, App, HttpServer};
 mod db;
 mod errors;
 mod handlers;
-mod interfaces;
+mod models;
 mod repository;
 mod schema;
 mod services;
@@ -28,7 +28,12 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .app_data(web::Data::new(pool.clone()))
-            .service(web::scope("/api").service(login).service(register))
+            .service(
+                web::scope("/api")
+                    .service(login)
+                    .service(register)
+                    .service(refresh),
+            )
     })
     .bind(SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8000))?
     .run()

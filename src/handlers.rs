@@ -2,14 +2,11 @@ use actix_web::{post, web, HttpResponse, Responder};
 
 use crate::{
     db,
-    interfaces::users::{InsertableUser, LoginFields},
-    repository::users::validate_user,
-    services,
+    models::users::{InsertableUser, LoginFields},
+    services::{self, jwt::RefreshInfo},
 };
 
-use jsonwebtoken;
-
-#[post("/login")]
+#[post("/token")]
 async fn login(pool: web::Data<db::DbPool>, req_body: web::Json<LoginFields>) -> impl Responder {
     let login_fields = req_body.into_inner();
 
@@ -18,12 +15,17 @@ async fn login(pool: web::Data<db::DbPool>, req_body: web::Json<LoginFields>) ->
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
 
-    let user = match validate_user(&mut conn, login_fields) {
+    let user = match services::users::validate_user(&mut conn, login_fields) {
         Ok(user) => user,
         Err(e) => return HttpResponse::Unauthorized().body(e.to_string()),
     };
 
-    HttpResponse::NotImplemented().finish()
+    let jwt = match services::jwt::generate_jwt(&mut conn, user) {
+        Ok(e) => e,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+
+    HttpResponse::Ok().json(jwt)
 }
 
 #[post("/register")]
@@ -44,4 +46,22 @@ async fn register(
     };
 
     HttpResponse::Ok().json(user)
+}
+
+#[post("/token/refresh")]
+async fn refresh(pool: web::Data<db::DbPool>, req_body: web::Json<RefreshInfo>) -> impl Responder {
+    let refresh_info = req_body.into_inner();
+
+    let mut conn = match pool.get() {
+        Ok(conn) => conn,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+
+    let refreshed_tokens =
+        match services::jwt::refresh_token(&mut conn, &refresh_info.refresh_token) {
+            Ok(jwt) => jwt,
+            Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+        };
+
+    HttpResponse::Ok().json(refreshed_tokens)
 }

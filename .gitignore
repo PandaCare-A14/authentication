@@ -1,2 +1,5 @@
 /target
 .env
+
+# just in case
+*.pem

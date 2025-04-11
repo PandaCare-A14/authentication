@@ -6,4 +6,4 @@ file = "src/schema.rs"
 custom_type_derives = ["diesel::query_builder::QueryId", "Clone"]
 
 [migrations_directory]
-dir = "/home/tobtoby/Code/web/pandacare-auth/migrations"
+dir = "/home/tobtoby/university/adpro/pandacare-auth/migrations"

@@ -7,7 +7,8 @@ edition = "2021"
 actix-web = "4"
 argon2 = "0.5.3"
 bigdecimal = { version = "0.4.8", features = ["serde"] }
-diesel = { version = "2.2.9", features = ["numeric", "postgres", "r2d2", "uuid"] }
+chrono = "0.4.40"
+diesel = { version = "2.2.9", features = ["chrono", "numeric", "postgres", "r2d2", "uuid"] }
 dotenvy = "0.15.7"
 env_logger = "0.11.8"
 jsonwebtoken = "9.3.1"
@@ -15,6 +16,8 @@ log = "0.4.27"
 password-hash = { version = "0.5.0", features = ["getrandom"] }
 postgres = "0.19.10"
 r2d2 = "0.8.10"
+rand = "0.9.0"
 serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
 thiserror = "2.0.12"
 uuid = { version = "1.16.0", features = ["serde", "v4"] }
