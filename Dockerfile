@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM rust:1.76 as builder
+FROM rust:1.76-slim as builder
 
 WORKDIR /app
 COPY . .
