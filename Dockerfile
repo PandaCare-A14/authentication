@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM rust:1.76-slim as builder
+FROM rust:1.76-bullseye as builder
 
 WORKDIR /app
 COPY . .
