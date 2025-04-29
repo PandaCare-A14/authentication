@@ -30,7 +30,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             .service(web::scope("/api").service(login).service(register))
     })
-    .bind(SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8000))?
+    .bind(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 8000))?
     .run()
     .await
 }
