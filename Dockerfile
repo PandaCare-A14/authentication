@@ -1,48 +1,56 @@
-# Stage 1: Build
+# Stage 1: Build the application
 FROM rust:1.86-slim AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Install only the necessary build dependencies
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     pkg-config \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Cargo.toml and Cargo.lock first to leverage Docker cache for dependencies
+# Copy dependency manifest files first (to leverage Docker layer caching)
 COPY Cargo.toml Cargo.lock ./
 
-# Create a dummy main.rs to build dependencies
-RUN mkdir -p src && \
-    echo "fn main() {}" > src/main.rs && \
-    cargo build --release && \
-    rm -rf src
+# Pre-build dependencies using a dummy main.rs to speed up rebuilds
+RUN mkdir -p src && echo "fn main() {}" > src/main.rs && \
+    cargo build --release && rm -rf src
 
 # Copy the actual source code
 COPY src src/
 
-# Rebuild with actual source code
+# Build the application in release mode
 RUN cargo build --release
 
-# Stage 2: Runtime - Using Ubuntu 22.04 with newer GLIBC
+# Stage 2: Runtime environment
 FROM ubuntu:22.04
 
-# Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install only the necessary runtime dependencies
+# Install only the runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+# Set default logging environment variables
+ENV RUST_LOG=info
+ENV RUST_BACKTRACE=1
+
+# Set the working directory inside the container
+WORKDIR /app
+
 # Copy the compiled binary from the builder stage
 COPY --from=builder /app/target/release/pandacare-auth /usr/local/bin/pandacare-auth
 
-# Expose the necessary port
+# Copy the startup script
+COPY start.sh /app/
+RUN chmod +x /app/start.sh
+
+# Expose the port used by the application
 EXPOSE 8000
 
-# Command to run the application
-CMD ["pandacare-auth"]
+# Run the startup script as the container entry point
+CMD ["/app/start.sh"]
