@@ -1,6 +1,10 @@
+use std::env;
 use std::net::{Ipv4Addr, SocketAddrV4};
 
 use actix_web::{web, App, HttpServer};
+use actix_web::middleware::Logger;
+use dotenvy::dotenv;
+use log;
 
 mod db;
 mod errors;
@@ -14,15 +18,18 @@ use crate::handlers::*;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    use actix_web::middleware::Logger;
-    use env_logger;
-    use log;
-
-    let pool = db::get_pool().unwrap();
+    dotenv().ok();
 
     env_logger::builder()
-        .filter_level(log::LevelFilter::Debug)
+        .filter_level(log::LevelFilter::Info)
         .init();
+
+    let pool = db::get_pool().expect("Failed to get DB pool");
+
+    let host = env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
+    let port = env::var("PORT").unwrap_or_else(|_| "8000".to_string())
+        .parse::<u16>()
+        .expect("PORT must be a number");
 
     HttpServer::new(move || {
         App::new()
@@ -35,7 +42,7 @@ async fn main() -> std::io::Result<()> {
                     .service(refresh),
             )
     })
-    .bind(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 8000))?
+    .bind((host.as_str(), port))?
     .run()
     .await
 }

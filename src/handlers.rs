@@ -21,7 +21,7 @@ async fn login(pool: web::Data<db::DbPool>, req_body: web::Json<LoginFields>) ->
     };
 
     let jwt = match services::jwt::generate_jwt(&mut conn, user) {
-        Ok(e) => e,
+        Ok(jwt) => jwt,
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
 

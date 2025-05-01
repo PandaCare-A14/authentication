@@ -51,6 +51,7 @@ RUN chmod +x /app/start.sh
 
 # Expose the port used by the application
 EXPOSE 8000
+HEALTHCHECK CMD curl --fail http://localhost:8000/ || exit 1
 
 # Run the startup script as the container entry point
 CMD ["/app/start.sh"]
