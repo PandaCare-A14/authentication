@@ -40,7 +40,7 @@ async fn register(
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
 
-    let user = match services::users::create_user(&mut conn, user_details) {
+    let _user = match services::users::create_user(&mut conn, user_details) {
         Ok(u) => u,
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };

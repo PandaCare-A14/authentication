@@ -35,14 +35,14 @@ pub fn validate_user(
     user_credentials: LoginFields,
 ) -> Result<User, UserValidationError> {
     let user = get_user_by_email(conn, &user_credentials.email)
-        .map_err(|_err| UserValidationError::InvalidEmail)?;
+        .map_err(|_err| UserValidationError::InvalidCredentials)?;
 
     let parsed_hash = PasswordHash::new(&user.password)
         .map_err(|_err| UserValidationError::InvalidPasswordFormat)?;
 
     let _ = Argon2::default()
         .verify_password(&user_credentials.password.as_bytes(), &parsed_hash)
-        .map_err(|_err| UserValidationError::IncorrectPassword);
+        .map_err(|_err| UserValidationError::InvalidCredentials)?;
 
     Ok(user)
 }
