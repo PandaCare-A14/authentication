@@ -45,7 +45,7 @@ async fn register(
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
 
-    HttpResponse::Ok().json(user)
+    HttpResponse::Created().body("User created successfully")
 }
 
 #[post("/token/refresh")]

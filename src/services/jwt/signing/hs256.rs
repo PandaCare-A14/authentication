@@ -11,8 +11,8 @@ pub struct HS256Signer {
 
 impl HS256Signer {
     pub fn new(path: &str) -> Result<Self, JWTCreationError> {
-        let key_file = fs::read(path).map_err(|_err| JWTCreationError::PrivateKeyNotFound)?;
-        let secret_key = EncodingKey::from_secret(&key_file);
+        let key_file = fs::read_to_string(path).map_err(|_err| JWTCreationError::PrivateKeyNotFound)?;
+        let secret_key = EncodingKey::from_base64_secret(&key_file.trim()).map_err(|_err| JWTCreationError::InvalidPrivateKey)?;
         Ok(Self { secret_key })
     }
 }

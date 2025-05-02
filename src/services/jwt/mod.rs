@@ -71,7 +71,7 @@ pub fn generate_jwt(conn: &mut Connection, user: User) -> Result<JWT, JWTCreatio
         role: "pacilian".to_string(),
     };
 
-    let signer: HS256Signer = HS256Signer::new("private-key.pem")?;
+    let signer: HS256Signer = HS256Signer::new("private.key")?;
 
     let access_token = signer
         .sign(claims)

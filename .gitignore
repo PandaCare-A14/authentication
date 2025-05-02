@@ -3,3 +3,6 @@
 
 # just in case
 *.pem
+*.key
+
+*.swp
