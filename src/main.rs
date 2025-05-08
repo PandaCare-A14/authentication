@@ -9,6 +9,7 @@ mod models;
 mod repository;
 mod schema;
 mod services;
+mod tests;
 
 use crate::handlers::*;
 
