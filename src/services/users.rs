@@ -40,8 +40,8 @@ pub fn validate_user(
     let parsed_hash = PasswordHash::new(&user.password)
         .map_err(|_err| UserValidationError::InvalidPasswordFormat)?;
 
-    let _ = Argon2::default()
-        .verify_password(&user_credentials.password.as_bytes(), &parsed_hash)
+    Argon2::default()
+        .verify_password(user_credentials.password.as_bytes(), &parsed_hash)
         .map_err(|_err| UserValidationError::InvalidCredentials)?;
 
     Ok(user)

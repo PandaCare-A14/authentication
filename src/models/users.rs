@@ -28,7 +28,6 @@ impl Display for User {
 
 #[derive(Deserialize, Insertable)]
 #[diesel(table_name = crate::schema::users)]
-
 pub struct InsertableUser {
     pub email: String,
     pub password: String,

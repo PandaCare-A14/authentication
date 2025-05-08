@@ -5,13 +5,13 @@ use super::users::UserValidationError;
 #[derive(Debug, Error)]
 pub enum JWTError {
     #[error("Failed to create JWT: {0}")]
-    JWTCreationError(#[from] self::JWTCreationError),
+    JWTCreation(#[from] self::JWTCreationError),
 
     #[error("Failed to validate JWT: {0}")]
-    JWTValidationError(#[from] self::JWTValidationError),
+    JWTValidation(#[from] self::JWTValidationError),
 
     #[error("User validation failed: {0}")]
-    UserValidationError(#[from] UserValidationError),
+    UserValidation(#[from] UserValidationError),
 }
 
 #[derive(Debug, Error)]

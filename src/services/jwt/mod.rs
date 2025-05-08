@@ -7,6 +7,7 @@ use crate::{
         users::get_user_by_id,
     },
 };
+
 use chrono::{DateTime, Duration, Utc};
 use rand::{distr::Alphanumeric, rng, Rng};
 use serde::{Deserialize, Serialize};
@@ -51,7 +52,7 @@ struct Claims {
 }
 
 #[derive(Serialize)]
-pub struct JWT {
+pub struct Jwt {
     pub access: String,
     pub refresh: String,
 }
@@ -61,7 +62,7 @@ pub struct RefreshInfo {
     pub refresh_token: String,
 }
 
-pub fn generate_jwt(conn: &mut Connection, user: User) -> Result<JWT, JWTCreationError> {
+pub fn generate_jwt(conn: &mut Connection, user: User) -> Result<Jwt, JWTCreationError> {
     // TODO: Modularize claims config
     let registered_claims = RegisteredClaims::new("Pandacare", "https://www.pandacare.com", 300);
 
@@ -86,51 +87,39 @@ pub fn generate_jwt(conn: &mut Connection, user: User) -> Result<JWT, JWTCreatio
     let refresh_token = create_refresh_token(conn, user, &random_str)
         .map_err(|_err| JWTCreationError::RefreshTokenGenerationFailure)?;
 
-    Ok(JWT {
+    Ok(Jwt {
         access: access_token,
         refresh: refresh_token,
     })
 }
 
-pub fn refresh_token(conn: &mut Connection, token_str: &str) -> Result<JWT, JWTError> {
+pub fn refresh_token(conn: &mut Connection, token_str: &str) -> Result<Jwt, JWTError> {
     use crate::errors::users::UserValidationError;
 
     let refresh_token: Vec<RefreshTokenDTO> = get_refresh_token(conn, token_str)
-        .map_err(|_err| JWTError::JWTValidationError(JWTValidationError::TokenFetchingFailure))?;
+        .map_err(|_err| JWTError::JWTValidation(JWTValidationError::TokenFetchingFailure))?;
 
     let refresh_token = match refresh_token.as_slice() {
         [only] => only,
-        [] => {
-            return Err(JWTError::JWTValidationError(
-                JWTValidationError::TokenNotFound,
-            ))
-        }
-        _ => {
-            return Err(JWTError::JWTValidationError(
-                JWTValidationError::DuplicateToken,
-            ))
-        }
+        [] => return Err(JWTError::JWTValidation(JWTValidationError::TokenNotFound)),
+        _ => return Err(JWTError::JWTValidation(JWTValidationError::DuplicateToken)),
     };
 
     let user_id = Uuid::parse_str(&refresh_token.user_id)
-        .map_err(|_err| JWTError::JWTValidationError(JWTValidationError::TokenInvalid))?;
+        .map_err(|_err| JWTError::JWTValidation(JWTValidationError::TokenInvalid))?;
 
     let user = get_user_by_id(conn, user_id)
-        .map_err(|_err| JWTError::UserValidationError(UserValidationError::UserNotFound))?;
+        .map_err(|_err| JWTError::UserValidation(UserValidationError::UserNotFound))?;
 
     if refresh_token.revoked {
-        Err(JWTError::JWTValidationError(
-            JWTValidationError::TokenRevoked,
-        ))
+        Err(JWTError::JWTValidation(JWTValidationError::TokenRevoked))
     } else if Utc::now().naive_utc() > refresh_token.expired_at {
-        Err(JWTError::JWTValidationError(
-            JWTValidationError::TokenExpired,
-        ))
+        Err(JWTError::JWTValidation(JWTValidationError::TokenExpired))
     } else {
         revoke_refresh_token(conn, &refresh_token.token)
-            .map_err(|_err| JWTError::JWTValidationError(JWTValidationError::TokenNotFound))?;
+            .map_err(|_err| JWTError::JWTValidation(JWTValidationError::TokenNotFound))?;
 
-        let jwt = generate_jwt(conn, user).map_err(|err| JWTError::JWTCreationError(err))?;
+        let jwt = generate_jwt(conn, user).map_err(JWTError::JWTCreation)?;
         Ok(jwt)
     }
 }
