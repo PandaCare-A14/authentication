@@ -9,8 +9,6 @@ pub type Connection = PooledConnection<ConnectionManager<PgConnection>>;
 pub type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn get_pool() -> Result<DbPool, Box<dyn Error>> {
-    dotenv()?;
-
     let connection_manager = ConnectionManager::<PgConnection>::new(env::var("DATABASE_URL")?);
 
     let pool = r2d2::Pool::builder().build(connection_manager)?;
