@@ -22,7 +22,10 @@ async fn main() -> std::io::Result<()> {
     use env_logger;
     use log;
 
-    dotenv().map_err(|err| std::io::Error::new(std::io::ErrorKind::NotFound, err.to_string()))?;
+    match dotenv() {
+        Ok(_) => {}
+        Err(_err) => {}
+    };
 
     println!("{}", std::env::var("SECRET_KEY").unwrap());
 
