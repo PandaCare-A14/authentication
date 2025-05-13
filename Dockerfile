@@ -1,11 +1,11 @@
-FROM rust:alpine3.21 as builder
-
+# Builder stage
+FROM rust:1.86-slim as builder
 WORKDIR /usr/src/pandacare-auth
 COPY . .
 RUN cargo install --path .
 
-FROM alpine:latest as runner
-RUN apk add --no-cache build-base
-
+# Runner stage
+FROM debian:stable as runner
+RUN apt update && apt install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/cargo/bin/pandacare-auth /usr/local/bin/pandacare-auth
 CMD ["pandacare-auth"]
