@@ -24,6 +24,8 @@ async fn main() -> std::io::Result<()> {
 
     dotenv().map_err(|err| std::io::Error::new(std::io::ErrorKind::NotFound, err.to_string()))?;
 
+    println!("{}", std::env::var("SECRET_KEY").unwrap());
+
     let pool = db::get_pool().unwrap();
 
     env_logger::builder()
