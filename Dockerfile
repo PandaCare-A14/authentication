@@ -6,6 +6,6 @@ RUN cargo install --path .
 
 # Runner stage
 FROM debian:stable as runner
-RUN apt update && apt install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install -y ca-certificates libpq-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/cargo/bin/pandacare-auth /usr/local/bin/pandacare-auth
 CMD ["pandacare-auth"]
