@@ -1,6 +1,7 @@
 # Builder stage
 FROM rust:1.86-slim as builder
 WORKDIR /usr/src/pandacare-auth
+RUN apt update && apt install -y libpq-dev pkg-config build-essential && rm -rf /var/lib/apt/lists/*
 COPY . .
 RUN cargo install --path .
 
