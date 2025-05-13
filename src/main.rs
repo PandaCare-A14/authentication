@@ -48,7 +48,7 @@ async fn main() -> std::io::Result<()> {
                     .service(refresh),
             )
     })
-    .bind(SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8000))?
+    .bind(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 80))?
     .run()
     .await
 }
