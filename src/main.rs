@@ -9,6 +9,8 @@ mod models;
 mod repository;
 mod schema;
 mod services;
+
+#[cfg(test)]
 mod tests;
 
 use crate::handlers::*;
