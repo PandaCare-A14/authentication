@@ -20,7 +20,7 @@ mod signing;
 pub struct RegisteredClaims {
     pub iss: String, // Issuer
     // pub sub: String, // Subject
-    pub aud: String, // Audience
+    // pub aud: String, // Audience
     pub exp: usize,  // Expiration time (as UTC timestamp)
     pub nbf: usize,  // Not before (as UTC timestamp)
     pub iat: usize,  // Issued at (as UTC timestamp)
@@ -28,13 +28,13 @@ pub struct RegisteredClaims {
 }
 
 impl RegisteredClaims {
-    pub fn new(iss: &str, aud: &str, seconds_to_expiration: i64) -> Self {
+    pub fn new(iss: &str, seconds_to_expiration: i64) -> Self {
         let now: DateTime<Utc> = Utc::now();
         let exp: DateTime<Utc> = now + Duration::seconds(seconds_to_expiration);
 
         RegisteredClaims {
             iss: iss.to_string(),
-            aud: aud.to_string(),
+            // aud: aud.to_string(),
             exp: exp.timestamp() as usize,
             nbf: now.timestamp() as usize,
             iat: now.timestamp() as usize,
@@ -62,13 +62,15 @@ pub struct RefreshInfo {
     pub refresh_token: String,
 }
 
+pub type RevocationInfo = RefreshInfo;
+
 pub fn generate_jwt(
     conn: &mut Connection,
     secret_key: String,
     user: User,
 ) -> Result<Jwt, JWTCreationError> {
     // TODO: Modularize claims config
-    let registered_claims = RegisteredClaims::new("Pandacare", "https://www.pandacare.com", 300);
+    let registered_claims = RegisteredClaims::new("Pandacare", 300);
 
     let claims = Claims {
         registered_claims,
