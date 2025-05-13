@@ -1,5 +1,4 @@
 use jsonwebtoken::{encode, EncodingKey, Header};
-use std::fs;
 
 use crate::errors::jwt::JWTCreationError;
 
@@ -10,10 +9,8 @@ pub struct HS256Signer {
 }
 
 impl HS256Signer {
-    pub fn new(path: &str) -> Result<Self, JWTCreationError> {
-        let key_file =
-            fs::read_to_string(path).map_err(|_err| JWTCreationError::PrivateKeyNotFound)?;
-        let secret_key = EncodingKey::from_base64_secret(key_file.trim())
+    pub fn new(base64_key: &str) -> Result<Self, JWTCreationError> {
+        let secret_key = EncodingKey::from_base64_secret(base64_key.trim())
             .map_err(|_err| JWTCreationError::InvalidPrivateKey)?;
         Ok(Self { secret_key })
     }

@@ -7,7 +7,11 @@ use crate::{
 };
 
 #[post("/token")]
-async fn login(pool: web::Data<db::DbPool>, req_body: web::Json<LoginFields>) -> impl Responder {
+async fn login(
+    pool: web::Data<db::DbPool>,
+    secret_key: web::Data<String>,
+    req_body: web::Json<LoginFields>,
+) -> impl Responder {
     let login_fields = req_body.into_inner();
 
     let mut conn = match pool.get() {
@@ -20,7 +24,7 @@ async fn login(pool: web::Data<db::DbPool>, req_body: web::Json<LoginFields>) ->
         Err(e) => return HttpResponse::Unauthorized().body(e.to_string()),
     };
 
-    let jwt = match services::jwt::generate_jwt(&mut conn, user) {
+    let jwt = match services::jwt::generate_jwt(&mut conn, secret_key.get_ref().clone(), user) {
         Ok(e) => e,
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
@@ -49,7 +53,11 @@ async fn register(
 }
 
 #[post("/token/refresh")]
-async fn refresh(pool: web::Data<db::DbPool>, req_body: web::Json<RefreshInfo>) -> impl Responder {
+async fn refresh(
+    pool: web::Data<db::DbPool>,
+    secret_key: web::Data<String>,
+    req_body: web::Json<RefreshInfo>,
+) -> impl Responder {
     let refresh_info = req_body.into_inner();
 
     let mut conn = match pool.get() {
@@ -57,11 +65,14 @@ async fn refresh(pool: web::Data<db::DbPool>, req_body: web::Json<RefreshInfo>) 
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
 
-    let refreshed_tokens =
-        match services::jwt::refresh_token(&mut conn, &refresh_info.refresh_token) {
-            Ok(jwt) => jwt,
-            Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
-        };
+    let refreshed_tokens = match services::jwt::refresh_token(
+        &mut conn,
+        secret_key.get_ref().clone(),
+        &refresh_info.refresh_token,
+    ) {
+        Ok(jwt) => jwt,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
 
     HttpResponse::Ok().json(refreshed_tokens)
 }

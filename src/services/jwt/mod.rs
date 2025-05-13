@@ -62,7 +62,11 @@ pub struct RefreshInfo {
     pub refresh_token: String,
 }
 
-pub fn generate_jwt(conn: &mut Connection, user: User) -> Result<Jwt, JWTCreationError> {
+pub fn generate_jwt(
+    conn: &mut Connection,
+    secret_key: String,
+    user: User,
+) -> Result<Jwt, JWTCreationError> {
     // TODO: Modularize claims config
     let registered_claims = RegisteredClaims::new("Pandacare", "https://www.pandacare.com", 300);
 
@@ -72,7 +76,7 @@ pub fn generate_jwt(conn: &mut Connection, user: User) -> Result<Jwt, JWTCreatio
         role: "pacilian".to_string(),
     };
 
-    let signer: HS256Signer = HS256Signer::new("private.key")?;
+    let signer: HS256Signer = HS256Signer::new(&secret_key)?;
 
     let access_token = signer
         .sign(claims)
@@ -93,7 +97,11 @@ pub fn generate_jwt(conn: &mut Connection, user: User) -> Result<Jwt, JWTCreatio
     })
 }
 
-pub fn refresh_token(conn: &mut Connection, token_str: &str) -> Result<Jwt, JWTError> {
+pub fn refresh_token(
+    conn: &mut Connection,
+    secret_key: String,
+    token_str: &str,
+) -> Result<Jwt, JWTError> {
     use crate::errors::users::UserValidationError;
 
     let refresh_token: Vec<RefreshTokenDTO> = get_refresh_token(conn, token_str)
@@ -119,7 +127,7 @@ pub fn refresh_token(conn: &mut Connection, token_str: &str) -> Result<Jwt, JWTE
         revoke_refresh_token(conn, &refresh_token.token)
             .map_err(|_err| JWTError::JWTValidation(JWTValidationError::TokenNotFound))?;
 
-        let jwt = generate_jwt(conn, user).map_err(JWTError::JWTCreation)?;
+        let jwt = generate_jwt(conn, secret_key, user).map_err(JWTError::JWTCreation)?;
         Ok(jwt)
     }
 }
