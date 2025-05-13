@@ -46,6 +46,7 @@ pub fn get_refresh_token(conn: &mut Connection, token: &str) -> QueryResult<Vec<
     Ok(refresh_token)
 }
 
+// Used to revoke a refresh token, returning the result of the update query
 pub fn revoke_refresh_token(conn: &mut Connection, token: &str) -> QueryResult<()> {
     use crate::schema::refresh_tokens::dsl::*;
 

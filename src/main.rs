@@ -49,9 +49,10 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             .service(
                 web::scope("/api")
-                    .service(login)
+                    .service(obtain)
                     .service(register)
-                    .service(refresh),
+                    .service(refresh)
+                    .service(revoke),
             )
     })
     .bind(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), port))?

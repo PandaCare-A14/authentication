@@ -3,11 +3,15 @@ use actix_web::{post, web, HttpResponse, Responder};
 use crate::{
     db,
     models::users::{InsertableUser, LoginFields},
-    services::{self, jwt::RefreshInfo},
+    repository::jwt::revoke_refresh_token,
+    services::{
+        self,
+        jwt::{RefreshInfo, RevocationInfo},
+    },
 };
 
-#[post("/token")]
-async fn login(
+#[post("/token/obtain")]
+async fn obtain(
     pool: web::Data<db::DbPool>,
     secret_key: web::Data<String>,
     req_body: web::Json<LoginFields>,
@@ -75,4 +79,23 @@ async fn refresh(
     };
 
     HttpResponse::Ok().json(refreshed_tokens)
+}
+
+#[post("/token/revoke")]
+async fn revoke(
+    pool: web::Data<db::DbPool>,
+    req_body: web::Json<RevocationInfo>,
+) -> impl Responder {
+    let revocation_info = req_body.into_inner();
+
+    let mut conn = match pool.get() {
+        Ok(conn) => conn,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+
+    if let Err(err) = revoke_refresh_token(&mut conn, &revocation_info.refresh_token) {
+        return HttpResponse::NotModified().body(err.to_string());
+    };
+
+    HttpResponse::Ok().body("Token successfully revoked")
 }

@@ -3,7 +3,7 @@ use dotenvy::dotenv;
 use serde_json::json;
 
 // Import your handlers
-use crate::handlers::{login, refresh, register};
+use crate::handlers::{obtain, refresh, register};
 // Import your database pool helper
 use crate::db;
 
@@ -48,7 +48,7 @@ async fn test_login_endpoint() {
         App::new()
             .app_data(actix_web::web::Data::new(pool.clone()))
             .service(register)
-            .service(login),
+            .service(obtain),
     )
     .await;
 
@@ -96,10 +96,11 @@ async fn test_refresh_endpoint() {
         App::new()
             .app_data(actix_web::web::Data::new(pool.clone()))
             .service(register)
-            .service(login)
+            .service(obtain)
             .service(refresh),
     )
     .await;
+    // Build application with register, login, and refresh endpoints
 
     // Register and login to obtain a refresh token
     let register_body = json!({
@@ -151,4 +152,3 @@ async fn test_refresh_endpoint() {
         serde_json::from_slice(&refresh_resp_body).expect("Invalid JSON");
     assert!(new_jwt.get("access").is_some());
 }
-
