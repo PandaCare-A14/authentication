@@ -1,3 +1,4 @@
+use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4};
 
 use actix_web::{web, App, HttpServer};
@@ -34,7 +35,12 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     let secret_key: String = std::env::var("SECRET_KEY")
-        .map_err(|err| std::io::Error::new(std::io::ErrorKind::NotFound, err.to_string()))?;
+        .map_err(|err| Error::new(ErrorKind::NotFound, err.to_string()))?;
+
+    let port = std::env::var("PORT")
+        .unwrap_or_else(|_| "8080".to_string())
+        .parse::<u16>()
+        .map_err(|err| Error::new(ErrorKind::NotFound, err.to_string()))?;
 
     HttpServer::new(move || {
         App::new()
@@ -48,7 +54,7 @@ async fn main() -> std::io::Result<()> {
                     .service(refresh),
             )
     })
-    .bind(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 80))?
+    .bind(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), port))?
     .run()
     .await
 }
