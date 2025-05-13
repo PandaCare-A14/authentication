@@ -27,8 +27,6 @@ async fn main() -> std::io::Result<()> {
         Err(_err) => {}
     };
 
-    println!("{}", std::env::var("SECRET_KEY").unwrap());
-
     let pool = db::get_pool().unwrap();
 
     env_logger::builder()
