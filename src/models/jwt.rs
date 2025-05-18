@@ -15,4 +15,5 @@ pub struct RefreshTokenDTO {
     pub user_id: String,
     pub expired_at: NaiveDateTime,
     pub revoked: bool,
+    pub issued_at: NaiveDateTime,
 }

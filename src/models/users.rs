@@ -1,4 +1,3 @@
-use bigdecimal::BigDecimal;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
@@ -11,18 +10,45 @@ pub struct User {
     pub id: Uuid,
     pub email: String,
     pub password: String,
-    pub name: String,
-    pub nik: BigDecimal,
-    pub phone_number: BigDecimal,
+    pub role: Role,
 }
 
 impl Display for User {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{{{},{},{},{}}}",
-            self.email, self.name, self.nik, self.phone_number
-        )
+        write!(f, "{{{},{}}}", self.id, self.email)
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, diesel_derive_enum::DbEnum)]
+#[serde(field_identifier, rename_all = "lowercase")]
+#[ExistingTypePath = "crate::schema::sql_types::Role"]
+pub enum Role {
+    Pacilian,
+    Caregiver,
+}
+
+impl Display for Role {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let snake_case = match *self {
+            Self::Pacilian => "pacilian",
+            Self::Caregiver => "caregiver",
+        };
+
+        write!(f, "{}", snake_case)
+    }
+}
+
+impl Serialize for Role {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let snake_case = match *self {
+            Self::Pacilian => "pacilian",
+            Self::Caregiver => "caregiver",
+        };
+
+        serializer.serialize_str(snake_case)
     }
 }
 
@@ -31,9 +57,7 @@ impl Display for User {
 pub struct InsertableUser {
     pub email: String,
     pub password: String,
-    pub name: String,
-    pub nik: BigDecimal,
-    pub phone_number: BigDecimal,
+    pub role: Role,
 }
 
 #[derive(Deserialize)]
