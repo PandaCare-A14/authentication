@@ -34,7 +34,6 @@ impl RegisteredClaims {
 
         RegisteredClaims {
             iss: iss.to_string(),
-            // aud: aud.to_string(),
             exp: exp.timestamp() as usize,
             nbf: now.timestamp() as usize,
             iat: now.timestamp() as usize,
@@ -69,13 +68,12 @@ pub fn generate_jwt(
     secret_key: String,
     user: User,
 ) -> Result<Jwt, JWTCreationError> {
-    // TODO: Modularize claims config
     let registered_claims = RegisteredClaims::new("Pandacare", 300);
 
     let claims = Claims {
         registered_claims,
         user_id: user.id.to_string(),
-        role: "pacilian".to_string(),
+        role: user.role.to_string(),
     };
 
     let signer: HS256Signer = HS256Signer::new(&secret_key)?;
@@ -109,7 +107,7 @@ pub fn refresh_token(
     let refresh_token: Vec<RefreshTokenDTO> = get_refresh_token(conn, token_str)
         .map_err(|_err| JWTError::JWTValidation(JWTValidationError::TokenFetchingFailure))?;
 
-    let refresh_token = match refresh_token.as_slice() {
+    let refresh_token: &RefreshTokenDTO = match refresh_token.as_slice() {
         [only] => only,
         [] => return Err(JWTError::JWTValidation(JWTValidationError::TokenNotFound)),
         _ => return Err(JWTError::JWTValidation(JWTValidationError::DuplicateToken)),
