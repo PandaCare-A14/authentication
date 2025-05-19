@@ -1,4 +1,8 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{
+    get,
+    http::header::{ContentDisposition, ContentType},
+    post, web, HttpResponse, Responder,
+};
 
 use crate::{
     db,
@@ -98,4 +102,14 @@ async fn revoke(
     };
 
     HttpResponse::Ok().body("Token successfully revoked")
+}
+
+#[get("/jwks")]
+async fn get_jwks(jwks_string: web::Data<String>) -> impl Responder {
+    let mut res_builder = HttpResponse::Ok();
+
+    res_builder
+        .content_type(ContentType::json())
+        .append_header(ContentDisposition::attachment("jwks.json"))
+        .body(jwks_string.get_ref().clone())
 }

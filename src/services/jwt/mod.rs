@@ -11,7 +11,7 @@ use crate::{
 use chrono::{DateTime, Duration, Utc};
 use rand::{distr::Alphanumeric, rng, Rng};
 use serde::{Deserialize, Serialize};
-use signing::{hs256::HS256Signer, TokenSigner};
+use signing::{hs256::HS256Signer, rs256::RS256Signer, TokenSigner};
 use uuid::{self, Uuid};
 
 mod signing;
@@ -76,7 +76,7 @@ pub fn generate_jwt(
         role: user.role.to_string(),
     };
 
-    let signer: HS256Signer = HS256Signer::new(&secret_key)?;
+    let signer: RS256Signer = RS256Signer::new(&secret_key)?;
 
     let access_token = signer
         .sign(claims)
