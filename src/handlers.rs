@@ -1,4 +1,5 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_files::NamedFile;
+use actix_web::{get, post, web, HttpResponse, Responder};
 
 use crate::{
     db,
@@ -98,4 +99,9 @@ async fn revoke(
     };
 
     HttpResponse::Ok().body("Token successfully revoked")
+}
+
+#[get("/jwks.json")]
+async fn get_jwks() -> actix_web::Result<NamedFile> {
+    Ok(NamedFile::open("jwks/jwks.json")?)
 }
