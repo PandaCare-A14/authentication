@@ -1,3 +1,4 @@
+use std::fs;
 use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4};
 
@@ -34,8 +35,7 @@ async fn main() -> std::io::Result<()> {
         .filter_level(log::LevelFilter::Debug)
         .init();
 
-    // TODO: UPDATE THIS TO USE RS256 KEY
-    let secret_key: String = std::env::var("SECRET_KEY")
+    let secret_key: String = fs::read_to_string("keys/rsa-private.pem")
         .map_err(|err| Error::new(ErrorKind::NotFound, err.to_string()))?;
 
     let port = std::env::var("PORT")
