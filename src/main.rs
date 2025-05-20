@@ -34,6 +34,7 @@ async fn main() -> std::io::Result<()> {
         .filter_level(log::LevelFilter::Debug)
         .init();
 
+    // TODO: UPDATE THIS TO USE RS256 KEY
     let secret_key: String = std::env::var("SECRET_KEY")
         .map_err(|err| Error::new(ErrorKind::NotFound, err.to_string()))?;
 
@@ -54,6 +55,7 @@ async fn main() -> std::io::Result<()> {
                     .service(refresh)
                     .service(revoke),
             )
+            .service(web::scope("/.well-known").service(get_jwks))
     })
     .bind(SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), port))?
     .run()
