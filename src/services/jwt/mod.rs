@@ -47,7 +47,7 @@ struct Claims {
     #[serde(flatten)]
     pub registered_claims: RegisteredClaims,
     pub user_id: String,
-    pub role: String,
+    pub roles: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -73,7 +73,7 @@ pub fn generate_jwt(
     let claims = Claims {
         registered_claims,
         user_id: user.id.to_string(),
-        role: user.role.to_string(),
+        roles: vec![user.role.to_string()],
     };
 
     let signer: RS256Signer = RS256Signer::new(&secret_key)?;
