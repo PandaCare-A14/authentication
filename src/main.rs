@@ -53,7 +53,8 @@ async fn main() -> std::io::Result<()> {
                     .service(obtain)
                     .service(register)
                     .service(refresh)
-                    .service(revoke),
+                    .service(revoke)
+                    .service(get_email_by_user_id),
             )
             .service(web::scope("/.well-known").service(get_jwks))
     })
