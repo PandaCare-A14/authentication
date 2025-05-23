@@ -1,10 +1,12 @@
 use actix_files::NamedFile;
 use actix_web::{get, post, web, HttpResponse, Responder};
+use serde::Serialize;
+use uuid::Uuid;
 
 use crate::{
     db,
     models::users::{InsertableUser, LoginFields},
-    repository::jwt::revoke_refresh_token,
+    repository::{jwt::revoke_refresh_token, users::get_user_by_id},
     services::{
         self,
         jwt::{RefreshInfo, RevocationInfo},
@@ -104,4 +106,32 @@ async fn revoke(
 #[get("/jwks.json")]
 async fn get_jwks() -> actix_web::Result<NamedFile> {
     Ok(NamedFile::open("jwks/jwks.json")?)
+}
+
+#[get("/email/{user_id}")]
+async fn get_email_by_user_id(
+    pool: web::Data<db::DbPool>,
+    user_id: web::Path<String>,
+) -> HttpResponse {
+    let mut conn = match pool.get() {
+        Ok(conn) => conn,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+
+    let user_id = match Uuid::parse_str(&user_id) {
+        Ok(user_id) => user_id,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+
+    let user = match get_user_by_id(&mut conn, user_id) {
+        Ok(user) => user,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+
+    #[derive(Serialize)]
+    struct EmailResponse {
+        email: String,
+    }
+
+    HttpResponse::Ok().json(EmailResponse { email: user.email })
 }
