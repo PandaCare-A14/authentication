@@ -1,5 +1,6 @@
 use actix_files::NamedFile;
 use actix_web::{get, post, web, HttpResponse, Responder};
+use serde::Serialize;
 use uuid::Uuid;
 
 use crate::{
@@ -127,5 +128,10 @@ async fn get_email_by_user_id(
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
 
-    HttpResponse::Ok().body(user.email)
+    #[derive(Serialize)]
+    struct EmailResponse {
+        email: String,
+    }
+
+    HttpResponse::Ok().json(EmailResponse { email: user.email })
 }
