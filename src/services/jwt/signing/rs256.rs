@@ -1,4 +1,4 @@
-use std::{fs, io};
+use std::fs;
 
 use jsonwebtoken::{encode, jwk::JwkSet, EncodingKey, Header};
 
