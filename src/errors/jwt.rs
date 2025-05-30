@@ -40,4 +40,6 @@ pub enum JWTCreationError {
     InvalidPrivateKey,
     #[error("Refresh token creation failed")]
     RefreshTokenGenerationFailure,
+    #[error("Token data invalid: {0}")]
+    InvalidTokenData(String),
 }
