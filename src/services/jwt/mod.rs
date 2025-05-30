@@ -1,3 +1,5 @@
+use std::{fs, io};
+
 use crate::{
     db::Connection,
     errors::jwt::{JWTCreationError, JWTError, JWTValidationError},
@@ -11,7 +13,7 @@ use crate::{
 use chrono::{DateTime, Duration, Utc};
 use rand::{distr::Alphanumeric, rng, Rng};
 use serde::{Deserialize, Serialize};
-use signing::{hs256::HS256Signer, rs256::RS256Signer, TokenSigner};
+use signing::{rs256::RS256Signer, TokenSigner};
 use uuid::{self, Uuid};
 
 mod signing;
@@ -31,7 +33,6 @@ impl RegisteredClaims {
     pub fn new(iss: &str, seconds_to_expiration: i64) -> Self {
         let now: DateTime<Utc> = Utc::now();
         let exp: DateTime<Utc> = now + Duration::seconds(seconds_to_expiration);
-
         RegisteredClaims {
             iss: iss.to_string(),
             exp: exp.timestamp() as usize,
