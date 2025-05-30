@@ -1397,6 +1397,7 @@ dependencies = [
  "env_logger",
  "jsonwebtoken",
  "log",
+ "once_cell",
  "password-hash",
  "postgres",
  "r2d2",

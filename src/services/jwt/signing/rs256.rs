@@ -1,4 +1,6 @@
-use jsonwebtoken::{encode, EncodingKey, Header};
+use std::fs;
+
+use jsonwebtoken::{encode, jwk::JwkSet, EncodingKey, Header};
 
 use crate::errors::jwt::JWTCreationError;
 
@@ -18,8 +20,32 @@ impl RS256Signer {
 
 impl TokenSigner for RS256Signer {
     fn sign(&self, claims: impl serde::Serialize) -> Result<String, JWTCreationError> {
+        let jwks_str: &str = &fs::read_to_string("jwks/jwks.json")
+            .map_err(|err| JWTCreationError::InvalidTokenData(err.to_string()))?;
+
+        // Assume we only have one Key
+        let jwks: JwkSet = serde_json::from_str::<JwkSet>(jwks_str)
+            .map_err(|err| JWTCreationError::InvalidTokenData(err.to_string()))?;
+
+        let jwk = jwks.keys.first().ok_or(JWTCreationError::InvalidTokenData(
+            "JWK not found".to_string(),
+        ))?;
+
+        let kid = jwk
+            .common
+            .key_id
+            .clone()
+            .ok_or(JWTCreationError::InvalidTokenData(
+                "JWK doesn't have a key ID".to_string(),
+            ))?;
+
         encode(
-            &Header::new(jsonwebtoken::Algorithm::RS256),
+            &Header {
+                typ: Some("JWT".to_string()),
+                alg: jsonwebtoken::Algorithm::RS256,
+                kid: Some(kid),
+                ..Default::default()
+            },
             &claims,
             &self.secret_key,
         )
