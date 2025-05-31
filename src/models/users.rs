@@ -1,3 +1,5 @@
+#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
+
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
