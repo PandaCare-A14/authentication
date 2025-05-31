@@ -11,8 +11,9 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
     - uses: actions/checkout@v3
@@ -20,18 +21,13 @@ jobs:
       with:
         toolchain: nightly
         override: true
-    - name: Run tests
-      run: cargo test --verbose
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        CARGO_INCREMENTAL: '0'
-        RUSTFLAGS: '-Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
-        RUSTDOCFLAGS: '-Cinstrument-coverage -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests' # Consider if all these are needed for RUSTDOCFLAGS
-
-    - name: rust-grcov
-      # You may pin to the exact commit or the version.
-      # uses: actions-rs/grcov@bb47b1ed7883a1502fa6875d562727ace2511248
-      uses: actions-rs/grcov@v0.1
+        
+    - name: Install cargo-llvm-cov
+      run: cargo install cargo-llvm-cov
+      
+    - name: Run tests with coverage
+      run: cargo llvm-cov --ignore-filename-regex "tests.rs|es256.rs|hs256.rs" --lcov --output-path lcov.info
+      
     - name: Codecov
       # You may pin to the exact commit or the version.
       # uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378
