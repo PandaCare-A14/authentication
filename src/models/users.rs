@@ -1,5 +1,3 @@
-#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
-
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
@@ -16,7 +14,6 @@ pub struct User {
 }
 
 impl Display for User {
-    #[cfg_attr(coverage_nightly, coverage(off))]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{{{},{}}}", self.id, self.email)
     }
@@ -42,7 +39,6 @@ impl Display for Role {
 }
 
 impl Serialize for Role {
-    #[cfg_attr(coverage_nightly, coverage(off))]
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
