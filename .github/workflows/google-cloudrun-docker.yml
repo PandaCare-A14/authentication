@@ -39,7 +39,7 @@ env:
   PROJECT_ID: 'pandacare-auth' # TODO: update to your Google Cloud project ID
   REGION: 'europe-west1' # TODO: update to your region
   SERVICE: 'authentication' # TODO: update to your service name
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/815720451379/locations/global/workloadIdentityPools/github/providers/authentication' # TODO: update to your workload identity provider
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/815720451379/locations/global/workloadIdentityPools/github/providers/my-repo' # TODO: update to your workload identity provider
 
 jobs:        
   deploy:
